@@ -8,4 +8,5 @@ public class ZeebeVariables {
     public static final String TRANSACTION_ID = "transactionId";
     public static final String PARTY_LOOKUP_FAILED = "partyLookupFailed";
     public static final String TRANSFER_SETTLEMENT_FAILED = "transferSettlementFailed";
+    public static final String SERVER_TRANSACTION_ID = "mpesaTransactionId";
 }
