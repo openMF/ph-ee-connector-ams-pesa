@@ -34,7 +34,7 @@ public class PesaRouteBuilder extends RouteBuilder {
         from("rest:POST:/api/paymentHub/Verification")
                 .process(exchange -> {
                     JSONObject channelRequest = new JSONObject(exchange.getIn().getBody(String.class));
-                    String transactionId = "test-transaction-id";
+                    String transactionId = "123";
                     exchange.setProperty(CHANNEL_REQUEST, channelRequest);
                     exchange.setProperty(TRANSACTION_ID, transactionId);
                 })
@@ -43,7 +43,7 @@ public class PesaRouteBuilder extends RouteBuilder {
         from("rest:POST:/api/paymentHub/Confirmation")
                 .process(exchange -> {
                     JSONObject channelRequest = new JSONObject(exchange.getIn().getBody(String.class));
-                    String transactionId = "test-transaction-id";
+                    String transactionId = "123";
                     exchange.setProperty(CHANNEL_REQUEST, channelRequest);
                     exchange.setProperty(TRANSACTION_ID, transactionId);
                 })
@@ -126,7 +126,7 @@ public class PesaRouteBuilder extends RouteBuilder {
 
                     PesacoreRequestDTO confirmationRequestDTO = getPesacoreDtoFromChannelRequest(channelRequest,
                             transactionId);
-                    confirmationRequestDTO.setStatus("TEST-STATUS");
+                    confirmationRequestDTO.setStatus("successful");
 
                     logger.info("Confirmation request DTO: \n\n\n" + confirmationRequestDTO);
                     return confirmationRequestDTO;
