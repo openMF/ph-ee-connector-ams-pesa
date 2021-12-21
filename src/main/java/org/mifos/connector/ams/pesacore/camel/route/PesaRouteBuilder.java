@@ -32,6 +32,24 @@ public class PesaRouteBuilder extends RouteBuilder {
     @Override
     public void configure() {
 
+        from("rest:POST:/api/paymentHub/Verification")
+                .process(exchange -> {
+                    JSONObject channelRequest = new JSONObject(exchange.getIn().getBody(String.class));
+                    String transactionId = "test-transaction-id";
+                    exchange.setProperty(CHANNEL_REQUEST, channelRequest);
+                    exchange.setProperty(TRANSACTION_ID, transactionId);
+                })
+                .to("direct:transfer-validation-base");
+
+        from("rest:POST:/api/paymentHub/Confirmation")
+                .process(exchange -> {
+                    JSONObject channelRequest = new JSONObject(exchange.getIn().getBody(String.class));
+                    String transactionId = "test-transaction-id";
+                    exchange.setProperty(CHANNEL_REQUEST, channelRequest);
+                    exchange.setProperty(TRANSACTION_ID, transactionId);
+                })
+                .to("direct:transfer-settlement-base");
+
         from("direct:transfer-validation-base")
                 .id("transfer-validation-base")
                 .log(LoggingLevel.INFO, "## Starting transfer Validation base route")
@@ -63,7 +81,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                     PesacoreRequestDTO verificationRequestDTO = getPesacoreDtoFromChannelRequest(channelRequest,
                             transactionId);
 
-                    logger.info("Validation request DTO: \n\n\n" + verificationEndpoint);
+                    logger.info("Validation request DTO: \n\n\n" + verificationRequestDTO);
                     return verificationRequestDTO;
                 })
                 .marshal().json(JsonLibrary.Jackson)
@@ -71,7 +89,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .log(LoggingLevel.INFO, "Pesacore verification api response: \n\n..\n\n..\n\n.. ${body}");
 
         from("direct:transfer-settlement-base")
-                .id("transfer-settlement")
+                .id("transfer-settlement-base")
                 .log(LoggingLevel.INFO, "## Transfer Settlement route")
                 .to("direct:transfer-settlement")
                 .choice()
@@ -109,6 +127,7 @@ public class PesaRouteBuilder extends RouteBuilder {
 
                     PesacoreRequestDTO confirmationRequestDTO = getPesacoreDtoFromChannelRequest(channelRequest,
                             transactionId);
+                    confirmationRequestDTO.setStatus("TEST-STATUS");
 
                     logger.info("Confirmation request DTO: \n\n\n" + confirmationRequestDTO);
                     return confirmationRequestDTO;

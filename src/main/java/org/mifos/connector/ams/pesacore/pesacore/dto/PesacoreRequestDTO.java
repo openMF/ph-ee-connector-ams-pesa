@@ -28,7 +28,30 @@ public class PesacoreRequestDTO {
     @JsonProperty("currency")
     private String currency;
 
+    @JsonProperty("status")
+    private String status;
+
     public PesacoreRequestDTO() {
+    }
+
+    @Override
+    public String toString() {
+        return "PesacoreRequestDTO{" +
+                "remoteTransactionId='" + remoteTransactionId + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", account='" + account + '\'' +
+                ", amount=" + amount +
+                ", currency='" + currency + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getRemoteTransactionId() {
