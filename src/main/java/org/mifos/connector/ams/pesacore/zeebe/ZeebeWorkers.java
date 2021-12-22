@@ -13,15 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static org.mifos.connector.ams.pesacore.zeebe.ZeebeUtil.zeebeVariablesToCamelProperties;
-import static org.mifos.connector.ams.pesacore.zeebe.ZeebeVariables.PARTY_LOOKUP_FAILED;
-import static org.mifos.connector.ams.pesacore.zeebe.ZeebeVariables.TRANSFER_SETTLEMENT_FAILED;
+import static org.mifos.connector.ams.pesacore.camel.config.CamelProperties.CHANNEL_REQUEST;
+import static org.mifos.connector.ams.pesacore.zeebe.ZeebeVariables.*;
 
 @Component
 public class ZeebeWorkers {
@@ -54,37 +50,67 @@ public class ZeebeWorkers {
                 .jobType("transfer-validation")
                 .handler((client, job) -> {
                     logWorkerDetails(job);
+
+                    Map<String, Object> variables;
                     if (isAmsLocalEnabled) {
                         Exchange ex = new DefaultExchange(camelContext);
                         // Do stuff here
-                        producerTemplate.send("direct:transfer-validation", ex);
+                        variables = job.getVariablesAsMap();
+
+                        JSONObject channelRequest = objectMapper.readValue(
+                                (String) variables.get("channelRequest"), JSONObject.class);
+                        String transactionId = (String) variables.get(TRANSACTION_ID);
+
+                        ex.setProperty(CHANNEL_REQUEST, channelRequest);
+                        ex.setProperty(TRANSACTION_ID, transactionId);
+
+                        producerTemplate.send("direct:transfer-validation-base", ex);
+
+                        boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, boolean.class);
+                        variables.put(PARTY_LOOKUP_FAILED, isPartyLookUpFailed);
                     } else {
-                        Map<String, Object> variables = new HashMap<>();
+                        variables = new HashMap<>();
                         variables.put(PARTY_LOOKUP_FAILED, false);
-                        zeebeClient.newCompleteCommand(job.getKey())
-                                .variables(variables)
-                                .send();
                     }
+
+                    zeebeClient.newCompleteCommand(job.getKey())
+                            .variables(variables)
+                            .send();
                 })
                 .name("transfer-validation")
                 .maxJobsActive(workerMaxJobs)
                 .open();
 
         zeebeClient.newWorker()
-                .jobType("transfer-settlement")
+                .jobType("direct:transfer-settlement-base")
                 .handler((client, job) -> {
                     logWorkerDetails(job);
+
+                    Map<String, Object> variables;
                     if (isAmsLocalEnabled) {
                         Exchange ex = new DefaultExchange(camelContext);
                         // Do stuff here
+                        variables = job.getVariablesAsMap();
+
+                        JSONObject channelRequest = objectMapper.readValue(
+                                (String) variables.get("channelRequest"), JSONObject.class);
+                        String transactionId = (String) variables.get(TRANSACTION_ID);
+
+                        ex.setProperty(CHANNEL_REQUEST, channelRequest);
+                        ex.setProperty(TRANSACTION_ID, transactionId);
+
                         producerTemplate.send("direct:transfer-settlement", ex);
+
+                        boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, boolean.class);
+                        variables.put(TRANSFER_SETTLEMENT_FAILED, isSettlementFailed);
                     } else {
-                        Map<String, Object> variables = new HashMap<>();
+                        variables = new HashMap<>();
                         variables.put(TRANSFER_SETTLEMENT_FAILED, false);
-                        zeebeClient.newCompleteCommand(job.getKey())
-                                .variables(variables)
-                                .send();
                     }
+
+                    zeebeClient.newCompleteCommand(job.getKey())
+                            .variables(variables)
+                            .send();
                 })
                 .name("transfer-settlement")
                 .maxJobsActive(workerMaxJobs)
