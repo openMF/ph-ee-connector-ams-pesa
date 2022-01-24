@@ -23,3 +23,13 @@ pesacore:
   endpoint:
     verification: /api/paymentHub/Verification
     confirmation: /api/paymentHub/Confirmation
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      liveness:
+        enabled: true
+      readiness:
+        enabled: true
