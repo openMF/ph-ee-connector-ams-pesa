@@ -20,6 +20,7 @@ ams:
 
 pesacore:
   base-url: https://qaoperations01.oneacrefund.org
+  auth-header: PaymentHubTest
   endpoint:
     verification: /api/paymentHub/Verification
     confirmation: /api/paymentHub/Confirmation
