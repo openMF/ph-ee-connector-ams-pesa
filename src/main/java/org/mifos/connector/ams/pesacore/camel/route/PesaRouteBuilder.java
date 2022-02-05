@@ -27,6 +27,8 @@ public class PesaRouteBuilder extends RouteBuilder {
     @Value("${pesacore.endpoint.confirmation}")
     private String confirmationEndpoint;
 
+    @Value("${pesacore.auth-header}")
+    private String authHeader;
 
     @Override
     public void configure() {
@@ -73,6 +75,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .removeHeader("*")
                 .setHeader(Exchange.HTTP_METHOD, constant("POST"))
                 .setHeader("Content-Type", constant("application/json"))
+                .setHeader("Authorization", simple(authHeader))
                 .setBody(exchange -> {
                     JSONObject channelRequest = (JSONObject) exchange.getProperty(CHANNEL_REQUEST);
                     String transactionId = exchange.getProperty(TRANSACTION_ID, String.class);
@@ -119,6 +122,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .removeHeader("*")
                 .setHeader(Exchange.HTTP_METHOD, constant("POST"))
                 .setHeader("Content-Type", constant("application/json"))
+                .setHeader("Authorization", simple(authHeader))
                 .setBody(exchange -> {
 
                     JSONObject channelRequest = (JSONObject) exchange.getProperty(CHANNEL_REQUEST);
