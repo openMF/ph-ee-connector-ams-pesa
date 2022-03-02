@@ -65,11 +65,18 @@ public class ZeebeWorkers {
 
                         producerTemplate.send("direct:transfer-validation-base", ex);
 
-                        boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, boolean.class);
+                        Boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, Boolean.class);
                         variables.put(PARTY_LOOKUP_FAILED, isPartyLookUpFailed);
+                        if(isPartyLookUpFailed != null && isPartyLookUpFailed) {
+                            variables.put(ERROR_INFORMATION, ex.getIn().getBody(String.class));
+                            // TODO: add [ERROR_CODE] and [ERROR_DESCRIPTION] variable in zeebe after parsing [ERROR_INFORMATION]
+                        }
                     } else {
                         variables = new HashMap<>();
                         variables.put(PARTY_LOOKUP_FAILED, false);
+                        variables.put(ERROR_INFORMATION, "AMS Local is disabled");
+                        variables.put(ERROR_CODE, null);
+                        variables.put(ERROR_DESCRIPTION, "AMS Local is disabled");
                     }
 
                     zeebeClient.newCompleteCommand(job.getKey())
@@ -99,11 +106,18 @@ public class ZeebeWorkers {
 
                         producerTemplate.send("direct:transfer-settlement", ex);
 
-                        boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, boolean.class);
+                        Boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, Boolean.class);
                         variables.put(TRANSFER_SETTLEMENT_FAILED, isSettlementFailed);
+                        if(isSettlementFailed != null && isSettlementFailed) {
+                            variables.put(ERROR_INFORMATION, ex.getIn().getBody(String.class));
+                            // TODO: add [ERROR_CODE] and [ERROR_DESCRIPTION] variable in zeebe after parsing [ERROR_INFORMATION]
+                        }
                     } else {
                         variables = new HashMap<>();
                         variables.put(TRANSFER_SETTLEMENT_FAILED, false);
+                        variables.put(ERROR_INFORMATION, "AMS Local is disabled");
+                        variables.put(ERROR_CODE, null);
+                        variables.put(ERROR_DESCRIPTION, "AMS Local is disabled");
                     }
 
                     zeebeClient.newCompleteCommand(job.getKey())
