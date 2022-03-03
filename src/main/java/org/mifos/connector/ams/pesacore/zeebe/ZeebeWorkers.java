@@ -66,7 +66,7 @@ public class ZeebeWorkers {
 
                         producerTemplate.send("direct:transfer-validation-base", ex);
 
-                        Boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, Boolean.class);
+                        Boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, boolean.class);
                         if(isPartyLookUpFailed == null) {
                             isPartyLookUpFailed = true;
                         }
@@ -113,7 +113,7 @@ public class ZeebeWorkers {
 
                         producerTemplate.send("direct:transfer-settlement", ex);
 
-                        Boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, Boolean.class);
+                        Boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, boolean.class);
                         if(isSettlementFailed == null) {
                             isSettlementFailed = true;
                         }
