@@ -8,6 +8,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.support.DefaultExchange;
 import org.json.JSONObject;
+import org.mifos.connector.ams.pesacore.util.PesacoreUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,11 +66,24 @@ public class ZeebeWorkers {
 
                         producerTemplate.send("direct:transfer-validation-base", ex);
 
-                        boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, boolean.class);
+                        Boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, Boolean.class);
+                        if(isPartyLookUpFailed == null) {
+                            isPartyLookUpFailed = true;
+                        }
                         variables.put(PARTY_LOOKUP_FAILED, isPartyLookUpFailed);
+                        if(isPartyLookUpFailed) {
+                            variables.put(ERROR_INFORMATION, ex.getIn().getBody(String.class));
+                            variables.put(ERROR_CODE, ex.getIn().getHeader("CamelHttpResponseCode"));
+                            variables.put(ERROR_DESCRIPTION, PesacoreUtils.parseErrorDescriptionFromJsonPayload(
+                                    ex.getIn().getBody(String.class)
+                            ));
+                        }
                     } else {
                         variables = new HashMap<>();
                         variables.put(PARTY_LOOKUP_FAILED, false);
+                        variables.put(ERROR_INFORMATION, "AMS Local is disabled");
+                        variables.put(ERROR_CODE, null);
+                        variables.put(ERROR_DESCRIPTION, "AMS Local is disabled");
                     }
 
                     zeebeClient.newCompleteCommand(job.getKey())
@@ -99,11 +113,24 @@ public class ZeebeWorkers {
 
                         producerTemplate.send("direct:transfer-settlement", ex);
 
-                        boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, boolean.class);
+                        Boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, Boolean.class);
+                        if(isSettlementFailed == null) {
+                            isSettlementFailed = true;
+                        }
                         variables.put(TRANSFER_SETTLEMENT_FAILED, isSettlementFailed);
+                        if(isSettlementFailed) {
+                            variables.put(ERROR_INFORMATION, ex.getIn().getBody(String.class));
+                            variables.put(ERROR_CODE, ex.getIn().getHeader("CamelHttpResponseCode"));
+                            variables.put(ERROR_DESCRIPTION, PesacoreUtils.parseErrorDescriptionFromJsonPayload(
+                                    ex.getIn().getBody(String.class)
+                            ));
+                        }
                     } else {
                         variables = new HashMap<>();
                         variables.put(TRANSFER_SETTLEMENT_FAILED, false);
+                        variables.put(ERROR_INFORMATION, "AMS Local is disabled");
+                        variables.put(ERROR_CODE, null);
+                        variables.put(ERROR_DESCRIPTION, "AMS Local is disabled");
                     }
 
                     zeebeClient.newCompleteCommand(job.getKey())
