@@ -8,6 +8,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.support.DefaultExchange;
 import org.json.JSONObject;
+import org.mifos.connector.ams.pesacore.util.PesacoreUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +67,16 @@ public class ZeebeWorkers {
                         producerTemplate.send("direct:transfer-validation-base", ex);
 
                         Boolean isPartyLookUpFailed = ex.getProperty(PARTY_LOOKUP_FAILED, Boolean.class);
+                        if(isPartyLookUpFailed == null) {
+                            isPartyLookUpFailed = true;
+                        }
                         variables.put(PARTY_LOOKUP_FAILED, isPartyLookUpFailed);
-                        if(isPartyLookUpFailed != null && isPartyLookUpFailed) {
+                        if(isPartyLookUpFailed) {
                             variables.put(ERROR_INFORMATION, ex.getIn().getBody(String.class));
-                            // TODO: add [ERROR_CODE] and [ERROR_DESCRIPTION] variable in zeebe after parsing [ERROR_INFORMATION]
+                            variables.put(ERROR_CODE, ex.getIn().getHeader("CamelHttpResponseCode"));
+                            variables.put(ERROR_DESCRIPTION, PesacoreUtils.parseErrorDescriptionFromJsonPayload(
+                                    ex.getIn().getBody(String.class)
+                            ));
                         }
                     } else {
                         variables = new HashMap<>();
@@ -107,10 +114,16 @@ public class ZeebeWorkers {
                         producerTemplate.send("direct:transfer-settlement", ex);
 
                         Boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, Boolean.class);
+                        if(isSettlementFailed == null) {
+                            isSettlementFailed = true;
+                        }
                         variables.put(TRANSFER_SETTLEMENT_FAILED, isSettlementFailed);
-                        if(isSettlementFailed != null && isSettlementFailed) {
+                        if(isSettlementFailed) {
                             variables.put(ERROR_INFORMATION, ex.getIn().getBody(String.class));
-                            // TODO: add [ERROR_CODE] and [ERROR_DESCRIPTION] variable in zeebe after parsing [ERROR_INFORMATION]
+                            variables.put(ERROR_CODE, ex.getIn().getHeader("CamelHttpResponseCode"));
+                            variables.put(ERROR_DESCRIPTION, PesacoreUtils.parseErrorDescriptionFromJsonPayload(
+                                    ex.getIn().getBody(String.class)
+                            ));
                         }
                     } else {
                         variables = new HashMap<>();

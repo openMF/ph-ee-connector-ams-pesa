@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.json:json:20190722'
     implementation 'io.camunda:zeebe-client-java:1.1.0'
     implementation 'com.auth0:java-jwt:3.10.2'
+    implementation 'com.google.code.gson:gson:2.3.1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.2.RELEASE'
 }
 
