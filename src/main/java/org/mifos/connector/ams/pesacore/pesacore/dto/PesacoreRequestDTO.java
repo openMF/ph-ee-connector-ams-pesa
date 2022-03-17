@@ -31,6 +31,9 @@ public class PesacoreRequestDTO {
     @JsonProperty("status")
     private String status;
 
+    @JsonProperty("receiptId")
+    private String receiptId;
+
     public PesacoreRequestDTO() {
     }
 
@@ -43,6 +46,7 @@ public class PesacoreRequestDTO {
                 ", amount=" + amount +
                 ", currency='" + currency + '\'' +
                 ", status='" + status + '\'' +
+                ", receiptId='" + receiptId + '\'' +
                 '}';
     }
 
@@ -92,5 +96,13 @@ public class PesacoreRequestDTO {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getReceiptId() {
+        return receiptId;
+    }
+
+    public void setReceiptId(String receiptId) {
+        this.receiptId = receiptId;
     }
 }
