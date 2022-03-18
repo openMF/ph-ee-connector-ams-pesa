@@ -107,11 +107,13 @@ public class ZeebeWorkers {
 
                         JSONObject channelRequest = new JSONObject((String) variables.get("channelRequest"));
                         String transactionId = (String) variables.get(TRANSACTION_ID);
+                        String mpesaReceiptNumber = (String) variables.get(SERVER_TRANSACTION_RECEIPT_NUMBER);
 
                         ex.setProperty(CHANNEL_REQUEST, channelRequest);
                         ex.setProperty(TRANSACTION_ID, transactionId);
+                        ex.setProperty(SERVER_TRANSACTION_RECEIPT_NUMBER, mpesaReceiptNumber);
 
-                        producerTemplate.send("direct:transfer-settlement", ex);
+                        producerTemplate.send("direct:transfer-settlement-base", ex);
 
                         Boolean isSettlementFailed = ex.getProperty(TRANSFER_SETTLEMENT_FAILED, boolean.class);
                         if(isSettlementFailed == null) {

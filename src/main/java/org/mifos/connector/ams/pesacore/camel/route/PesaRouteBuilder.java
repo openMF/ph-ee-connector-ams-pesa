@@ -127,10 +127,12 @@ public class PesaRouteBuilder extends RouteBuilder {
 
                     JSONObject channelRequest = (JSONObject) exchange.getProperty(CHANNEL_REQUEST);
                     String transactionId = exchange.getProperty(TRANSACTION_ID, String.class);
+                    String mpesaReceiptNumber = exchange.getProperty(SERVER_TRANSACTION_RECEIPT_NUMBER, String.class);
 
                     PesacoreRequestDTO confirmationRequestDTO = getPesacoreDtoFromChannelRequest(channelRequest,
                             transactionId);
                     confirmationRequestDTO.setStatus("successful");
+                    confirmationRequestDTO.setReceiptId(mpesaReceiptNumber);
 
                     logger.info("Confirmation request DTO: \n\n\n" + confirmationRequestDTO);
                     return confirmationRequestDTO;
