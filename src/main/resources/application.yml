@@ -34,6 +34,7 @@ management:
         enabled: true
       readiness:
         enabled: true
+
 logging:
   level:
-    ROOT: ERROR
+    root: ERROR
