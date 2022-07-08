@@ -7,7 +7,7 @@ public class PesacoreUtils {
 
     public static String parseErrorDescriptionFromJsonPayload(String errorJson) {
         if (errorJson == null || errorJson.isEmpty()) {
-            return null;
+            return "Internal Server Error";
         }
         try {
         JsonObject jsonObject = (new Gson()).fromJson(errorJson, JsonObject.class);
@@ -21,7 +21,7 @@ public class PesacoreUtils {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        return null;
+        return "Internal Server Error";
     }
 
 }
