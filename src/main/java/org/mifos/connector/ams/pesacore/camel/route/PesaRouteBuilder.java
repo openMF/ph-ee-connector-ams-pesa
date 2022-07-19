@@ -130,7 +130,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                     String mpesaReceiptNumber = exchange.getProperty(SERVER_TRANSACTION_RECEIPT_NUMBER, String.class);
 
                     PesacoreRequestDTO confirmationRequestDTO = getPesacoreDtoFromChannelRequest(channelRequest,
-                            transactionId);
+                            mpesaReceiptNumber);
                     confirmationRequestDTO.setStatus("successful");
                     confirmationRequestDTO.setReceiptId(mpesaReceiptNumber);
 
