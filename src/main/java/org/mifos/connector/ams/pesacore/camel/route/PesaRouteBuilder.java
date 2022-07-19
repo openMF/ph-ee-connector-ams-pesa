@@ -80,7 +80,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                     JSONObject channelRequest = (JSONObject) exchange.getProperty(CHANNEL_REQUEST);
                     String transactionId = exchange.getProperty(TRANSACTION_ID, String.class);
 
-                    PesacoreRequestDTO verificationRequestDTO = getPesacoreDtoFromChannelRequest(channelRequest,
+                    PesacoreRequestDTO verificationRequestDTO = buildPesacoreDtoFromChannelRequest(channelRequest,
                             transactionId);
 
                     logger.info("Validation request DTO: \n\n\n" + verificationRequestDTO);
@@ -127,10 +127,10 @@ public class PesaRouteBuilder extends RouteBuilder {
 
                     JSONObject channelRequest = (JSONObject) exchange.getProperty(CHANNEL_REQUEST);
                     String transactionId = exchange.getProperty(TRANSACTION_ID, String.class);
-                    String mpesaReceiptNumber = exchange.getProperty(SERVER_TRANSACTION_RECEIPT_NUMBER, String.class);
+                    String mpesaReceiptNumber = exchange.getProperty(EXTERNAL_ID, String.class);
 
-                    PesacoreRequestDTO confirmationRequestDTO = getPesacoreDtoFromChannelRequest(channelRequest,
-                            transactionId);
+                    PesacoreRequestDTO confirmationRequestDTO = buildPesacoreDtoFromChannelRequest(channelRequest,
+                            mpesaReceiptNumber);
                     confirmationRequestDTO.setStatus("successful");
                     confirmationRequestDTO.setReceiptId(mpesaReceiptNumber);
 
@@ -153,8 +153,8 @@ public class PesaRouteBuilder extends RouteBuilder {
         return pesacoreBaseUrl + confirmationEndpoint;
     }
 
-    private PesacoreRequestDTO getPesacoreDtoFromChannelRequest(JSONObject channelRequest, String transactionId) {
-        PesacoreRequestDTO verificationRequestDTO = new PesacoreRequestDTO();
+    private PesacoreRequestDTO buildPesacoreDtoFromChannelRequest(JSONObject channelRequest, String transactionId) {
+        PesacoreRequestDTO pesacoreRequestDTO = new PesacoreRequestDTO();
 
         String phoneNumber = channelRequest.getJSONObject("payer")
                 .getJSONObject("partyIdInfo").getString("partyIdentifier");
@@ -165,12 +165,12 @@ public class PesaRouteBuilder extends RouteBuilder {
         Long amount = amountJson.getLong("amount");
         String currency = amountJson.getString("currency");
 
-        verificationRequestDTO.setRemoteTransactionId(transactionId);
-        verificationRequestDTO.setAmount(amount);
-        verificationRequestDTO.setPhoneNumber(phoneNumber);
-        verificationRequestDTO.setCurrency(currency);
-        verificationRequestDTO.setAccount(accountId);
+        pesacoreRequestDTO.setRemoteTransactionId(transactionId);
+        pesacoreRequestDTO.setAmount(amount);
+        pesacoreRequestDTO.setPhoneNumber(phoneNumber);
+        pesacoreRequestDTO.setCurrency(currency);
+        pesacoreRequestDTO.setAccount(accountId);
 
-        return verificationRequestDTO;
+        return pesacoreRequestDTO;
     }
 }
