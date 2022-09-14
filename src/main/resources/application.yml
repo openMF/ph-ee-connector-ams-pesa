@@ -17,6 +17,7 @@ zeebe:
 ams:
   local:
     enabled: false
+  timeout: 60000
 
 pesacore:
   base-url: https://qaoperations01.oneacrefund.org

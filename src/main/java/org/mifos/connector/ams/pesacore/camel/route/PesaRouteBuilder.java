@@ -6,6 +6,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.json.JSONObject;
 import org.mifos.connector.ams.pesacore.pesacore.dto.PesacoreRequestDTO;
+import org.mifos.connector.ams.pesacore.util.ConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,9 @@ public class PesaRouteBuilder extends RouteBuilder {
 
     @Value("${pesacore.auth-header}")
     private String authHeader;
+
+    @Value("${ams.timeout}")
+    private Integer amsTimeout;
 
     @Override
     public void configure() {
@@ -87,7 +91,8 @@ public class PesaRouteBuilder extends RouteBuilder {
                     return verificationRequestDTO;
                 })
                 .marshal().json(JsonLibrary.Jackson)
-                .toD(getVerificationEndpoint() + "?bridgeEndpoint=true&throwExceptionOnFailure=false")
+                .toD(getVerificationEndpoint()+ "?bridgeEndpoint=true&throwExceptionOnFailure=false&"+
+                        ConnectionUtils.getConnectionTimeoutDsl(amsTimeout))
                 .log(LoggingLevel.INFO, "Pesacore verification api response: \n\n..\n\n..\n\n.. ${body}");
 
         from("direct:transfer-settlement-base")
@@ -138,7 +143,8 @@ public class PesaRouteBuilder extends RouteBuilder {
                     return confirmationRequestDTO;
                 })
                 .marshal().json(JsonLibrary.Jackson)
-                .toD(getConfirmationEndpoint() + "?bridgeEndpoint=true&throwExceptionOnFailure=false")
+                .toD(getConfirmationEndpoint() + "?bridgeEndpoint=true&throwExceptionOnFailure=false&"+
+                        ConnectionUtils.getConnectionTimeoutDsl(amsTimeout))
                 .log(LoggingLevel.INFO, "Pesacore verification api response: \n\n..\n\n..\n\n.. ${body}");
 
     }
