@@ -1,12 +1,10 @@
 camel:
-  server-port: 5003
+  server-port: 5000
   springboot:
     main-run-controller: true
   dataformat:
     json-jackson:
       auto-discover-object-mapper: true
-server:
-  port: 8083
 
 zeebe:
   client:
@@ -23,7 +21,7 @@ ams:
 
 pesacore:
   base-url: https://qaoperations01.oneacrefund.org
-  auth-header: 51f56774-8ef6-11ec-b909-0242ac120002
+  auth-header: PaymentHubTest
   endpoint:
     verification: /api/paymentHub/Verification
     confirmation: /api/paymentHub/Confirmation
@@ -39,4 +37,4 @@ management:
         enabled: true
 logging:
   level:
-    ROOT: INFO
+    ROOT: ERROR
