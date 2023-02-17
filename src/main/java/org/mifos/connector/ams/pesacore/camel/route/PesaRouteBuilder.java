@@ -62,6 +62,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .setBody(e -> {
                     String body=e.getIn().getBody(String.class);
                     logger.debug("Body : {}",body);
+                    e.setProperty("dfspId",e.getProperty("dfspId"));
                     return body;
                 })
                 .to("direct:transfer-validation-base")
@@ -88,6 +89,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .process(exchange -> {
                     // processing success case
                     exchange.setProperty(PARTY_LOOKUP_FAILED, false);
+                    exchange.setProperty("dfspId",exchange.getProperty("dfspId"));
                     logger.debug("Pesacore Validation Success");
                 })
                 .otherwise()
@@ -95,6 +97,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .process(exchange -> {
                     // processing unsuccessful case
                     exchange.setProperty(PARTY_LOOKUP_FAILED, true);
+                    exchange.setProperty("dfspId",exchange.getProperty("dfspId"));
                     logger.debug("Pesacore Validation Failure");
                 });
 
@@ -112,7 +115,7 @@ public class PesaRouteBuilder extends RouteBuilder {
 
                         PesacoreRequestDTO verificationRequestDTO = buildPesacoreDtoFromChannelRequest(channelRequest,
                                 transactionId);
-                        logger.info("Validation request DTO: \n\n\n" + verificationRequestDTO);
+                        logger.debug("Validation request DTO: \n\n\n" + verificationRequestDTO);
                         return verificationRequestDTO;
                     }
                     else {
@@ -122,7 +125,8 @@ public class PesaRouteBuilder extends RouteBuilder {
                         String transactionId = pesacoreRequestDTO.getRemoteTransactionId();
                         log.info(pesacoreRequestDTO.toString());
                         exchange.setProperty(TRANSACTION_ID, transactionId);
-                        logger.info("Validation request DTO: \n\n\n" + pesacoreRequestDTO);
+                        exchange.setProperty("dfspId",exchange.getProperty("dfspId"));
+                        logger.debug("Validation request DTO: \n\n\n" + pesacoreRequestDTO);
                         return pesacoreRequestDTO;
                     }
                 })
