@@ -62,7 +62,8 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .setBody(e -> {
                     String body=e.getIn().getBody(String.class);
                     logger.debug("Body : {}",body);
-                    e.setProperty("dfspId",e.getProperty("dfspId"));
+                    String accountHoldingInstitutionId= String.valueOf(e.getIn().getHeader("accountHoldingInstitutionId"));
+                    e.setProperty("accountHoldingInstitutionId",accountHoldingInstitutionId);
                     return body;
                 })
                 .to("direct:transfer-validation-base")
@@ -73,8 +74,12 @@ public class PesaRouteBuilder extends RouteBuilder {
                     // Building the response
                     JSONObject responseObject=new JSONObject();
                     responseObject.put("reconciled", e.getProperty(PARTY_LOOKUP_FAILED).equals(false));
-                    responseObject.put("AMS", "roster");
-                    responseObject.put("transaction_id", transactionId);
+                    responseObject.put("amsName", "roster");
+                    responseObject.put("accountHoldingInstitutionId", e.getProperty("accountHoldingInstitutionId"));
+                    responseObject.put(TRANSACTION_ID, e.getProperty(TRANSACTION_ID));
+                    responseObject.put("amount", e.getProperty("amount"));
+                    responseObject.put("currency", e.getProperty("currency"));
+                    responseObject.put("msisdn", e.getProperty("msisdn"));
                     logger.debug("response object "+responseObject);
                     e.getIn().setBody(responseObject.toString());
                 });
@@ -89,7 +94,11 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .process(exchange -> {
                     // processing success case
                     exchange.setProperty(PARTY_LOOKUP_FAILED, false);
-                    exchange.setProperty("dfspId",exchange.getProperty("dfspId"));
+                    exchange.setProperty("accountHoldingInstitutionId", exchange.getProperty("accountHoldingInstitutionId"));
+                    exchange.setProperty(TRANSACTION_ID, exchange.getProperty(TRANSACTION_ID));
+                    exchange.setProperty("amount", exchange.getProperty("amount"));
+                    exchange.setProperty("currency", exchange.getProperty("currency"));
+                    exchange.setProperty("msisdn", exchange.getProperty("msisdn"));
                     logger.debug("Pesacore Validation Success");
                 })
                 .otherwise()
@@ -97,7 +106,11 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .process(exchange -> {
                     // processing unsuccessful case
                     exchange.setProperty(PARTY_LOOKUP_FAILED, true);
-                    exchange.setProperty("dfspId",exchange.getProperty("dfspId"));
+                    exchange.setProperty("accountHoldingInstitutionId", exchange.getProperty("accountHoldingInstitutionId"));
+                    exchange.setProperty(TRANSACTION_ID, exchange.getProperty(TRANSACTION_ID));
+                    exchange.setProperty("amount", exchange.getProperty("amount"));
+                    exchange.setProperty("currency", exchange.getProperty("currency"));
+                    exchange.setProperty("msisdn", exchange.getProperty("msisdn"));
                     logger.debug("Pesacore Validation Failure");
                 });
 
@@ -122,10 +135,12 @@ public class PesaRouteBuilder extends RouteBuilder {
                         JSONObject paybillRequest = new JSONObject(exchange.getIn().getBody(String.class));
                         PesacoreRequestDTO pesacoreRequestDTO = PesacoreUtils.convertPaybillPayloadToAmsPesacorePayload(paybillRequest);
 
-                        String transactionId = pesacoreRequestDTO.getRemoteTransactionId();
-                        log.info(pesacoreRequestDTO.toString());
-                        exchange.setProperty(TRANSACTION_ID, transactionId);
-                        exchange.setProperty("dfspId",exchange.getProperty("dfspId"));
+                        log.debug(pesacoreRequestDTO.toString());
+                        exchange.setProperty(TRANSACTION_ID, pesacoreRequestDTO.getRemoteTransactionId());
+                        exchange.setProperty("amount", pesacoreRequestDTO.getAmount());
+                        exchange.setProperty("currency", pesacoreRequestDTO.getCurrency());
+                        exchange.setProperty("msisdn", pesacoreRequestDTO.getPhoneNumber());
+                        exchange.setProperty("accountHoldingInstitutionId", exchange.getProperty("accountHoldingInstitutionId"));
                         logger.debug("Validation request DTO: \n\n\n" + pesacoreRequestDTO);
                         return pesacoreRequestDTO;
                     }
