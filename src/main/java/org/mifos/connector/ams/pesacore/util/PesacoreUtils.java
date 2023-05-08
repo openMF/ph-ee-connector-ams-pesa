@@ -6,8 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mifos.connector.ams.pesacore.pesacore.dto.PesacoreRequestDTO;
 
-import static org.apache.camel.model.dataformat.JsonLibrary.Gson;
-
 public class PesacoreUtils {
 
     public static String parseErrorDescriptionFromJsonPayload(String errorJson) {
@@ -32,11 +30,14 @@ public class PesacoreUtils {
     public static PesacoreRequestDTO convertPaybillPayloadToAmsPesacorePayload(JSONObject payload) {
         String transactionId = convertCustomData(payload.getJSONArray("customData"), "transactionId");
         String currency = convertCustomData(payload.getJSONArray("customData"), "currency");
-        String wallet_msisdn=payload.getJSONObject("secondaryIdentifier").getString("value");
-        String accountID=payload.getJSONObject("primaryIdentifier").getString("value");
+        String wallet_msisdn = payload.getJSONObject("secondaryIdentifier").getString("value");
+        String accountID = payload.getJSONObject("primaryIdentifier").getString("value");
+        String amount = convertCustomData(payload.getJSONArray("customData"), "amount").trim();
+        Long amountLong = Double.valueOf(amount).longValue();
+
         PesacoreRequestDTO validationRequestDTO = new PesacoreRequestDTO();
         validationRequestDTO.setAccount(accountID);
-        validationRequestDTO.setAmount(1L);
+        validationRequestDTO.setAmount(amountLong);
         validationRequestDTO.setCurrency(currency);
         validationRequestDTO.setRemoteTransactionId(transactionId);
         validationRequestDTO.setPhoneNumber(wallet_msisdn);
