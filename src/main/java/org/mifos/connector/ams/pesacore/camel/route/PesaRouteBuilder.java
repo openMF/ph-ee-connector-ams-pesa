@@ -193,7 +193,7 @@ public class PesaRouteBuilder extends RouteBuilder {
                     confirmationRequestDTO.setStatus("successful");
                     confirmationRequestDTO.setReceiptId(mpesaReceiptNumber);
 
-                    logger.info("Confirmation request DTO: \n\n\n" + confirmationRequestDTO);
+                    logger.debug("Confirmation request DTO: \n\n\n" + confirmationRequestDTO);
                     return confirmationRequestDTO;
                 })
                 .marshal().json(JsonLibrary.Jackson)
