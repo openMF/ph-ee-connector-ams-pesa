@@ -184,28 +184,17 @@ public class PesaRouteBuilder extends RouteBuilder {
                 .setHeader("Content-Type", constant("application/json"))
                 .setHeader("Authorization", simple("Token " + authHeader))
                 .setBody(exchange -> {
-                    if(exchange.getProperty(CHANNEL_REQUEST).toString().contains("customData")){
-                        JSONObject channelRequest = (JSONObject) exchange.getProperty(CHANNEL_REQUEST);
-                        String transactionId = exchange.getProperty(TRANSACTION_ID, String.class);
-                        String mpesaReceiptNumber = exchange.getProperty(EXTERNAL_ID, String.class);
+                    JSONObject channelRequest = (JSONObject) exchange.getProperty(CHANNEL_REQUEST);
+                    String transactionId = exchange.getProperty(TRANSACTION_ID, String.class);
+                    String mpesaReceiptNumber = exchange.getProperty(EXTERNAL_ID, String.class);
 
-                        PesacoreRequestDTO confirmationRequestDTO = buildPesacoreDtoFromChannelRequest(channelRequest,
-                                mpesaReceiptNumber);
-                        confirmationRequestDTO.setStatus("successful");
-                        confirmationRequestDTO.setReceiptId(mpesaReceiptNumber);
+                    PesacoreRequestDTO confirmationRequestDTO = buildPesacoreDtoFromChannelRequest(channelRequest,
+                            mpesaReceiptNumber);
+                    confirmationRequestDTO.setStatus("successful");
+                    confirmationRequestDTO.setReceiptId(mpesaReceiptNumber);
 
-                        logger.info("Confirmation request DTO: \n\n\n" + confirmationRequestDTO);
-                        return confirmationRequestDTO;
-                    }else {
-                        JSONObject paybillRequest = new JSONObject(exchange.getIn().getBody(String.class));
-                        PesacoreRequestDTO pesacoreRequestDTO = PesacoreUtils.convertPaybillPayloadToAmsPesacorePayload(paybillRequest);
-
-                        String transactionId = pesacoreRequestDTO.getRemoteTransactionId();
-                        log.debug(pesacoreRequestDTO.toString());
-                        exchange.setProperty(TRANSACTION_ID, transactionId);
-                        logger.debug("Confirmation request DTO: {}" ,pesacoreRequestDTO);
-                        return pesacoreRequestDTO;
-                    }
+                    logger.debug("Confirmation request DTO: \n\n\n" + confirmationRequestDTO);
+                    return confirmationRequestDTO;
                 })
                 .marshal().json(JsonLibrary.Jackson)
                 .toD(getConfirmationEndpoint() + "?bridgeEndpoint=true&throwExceptionOnFailure=false&"+
